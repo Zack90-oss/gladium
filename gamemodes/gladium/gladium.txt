@@ -1,0 +1,21 @@
+"Swords"
+{
+	"base"		"base"
+	"title"		"Brutal Sword Fight [BSF]"
+	"maps"		"^aoc_|^dm_|^swrd_"
+	"category"	"pvp"
+	"menusystem"	"1"
+
+	"settings"
+	{
+		1
+		{
+			"name"		"swords_sv_feints"
+			"text"		"Feints"
+			"help"		"[Template]Enables Mordhau(or Chivalry(1))-like feints"
+			"type"		"CheckBox"
+			"default"	"0"
+		}
+		
+	}
+}
