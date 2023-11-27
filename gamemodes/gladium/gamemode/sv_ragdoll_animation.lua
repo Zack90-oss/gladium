@@ -1,5 +1,7 @@
 BSF_RAGDOLLCONTROL_ANIMATION = BSF_RAGDOLLCONTROL_ANIMATION or {}
 
+--\\Registration
+
 BSF_RAGDOLLCONTROL_ANIMATION.AnimationSets = BSF_RAGDOLLCONTROL_ANIMATION.AnimationSets or {}
 BSF_RAGDOLLCONTROL_ANIMATION.AnimationSetsReportedTime = BSF_RAGDOLLCONTROL_ANIMATION.AnimationSetsReportedTime or {} -- Optional, but very useful for attack anims
 
@@ -15,6 +17,10 @@ function BSF_RAGDOLLCONTROL_ANIMATION:ReloadAnimations()
 	end
 end
 BSF_RAGDOLLCONTROL_ANIMATION:ReloadAnimations()
+
+--//
+
+--\\Utils
 
 function BSF_RAGDOLLCONTROL_ANIMATION:Anim_Gettimemul(time,endtime)
 	return time/endtime
@@ -32,7 +38,11 @@ function BSF_RAGDOLLCONTROL_ANIMATION:Anim_ApproachAngle(ang,goalang,rate)
 	return Angle( math.ApproachAngle(ang[1],goalang[1],rate),math.ApproachAngle(ang[2],goalang[2],rate),math.ApproachAngle(ang[3],goalang[3],rate) )
 end
 
-BSF_RAGDOLLCONTROL_ANIMATION.AnimEventsRagThink = function(rag)
+--//
+
+BSF_RAGDOLLCONTROL_ANIMATION.AnimEventsRagThink = function(rag)						--; TODO
+	rag._AnimEvents = rag._AnimEvents or {}
+
 	local count = 0
 	for event,time in pairs(rag._AnimEvents)do
 		count = count + 1
@@ -42,16 +52,18 @@ BSF_RAGDOLLCONTROL_ANIMATION.AnimEventsRagThink = function(rag)
 		end
 	end
 	if(count==0)then
-		hook.Remove("Think",rag)
+		--hook.Remove("Think",rag)	--; Allah-Allah..
 	end
 end
-function BSF_RAGDOLLCONTROL_ANIMATION:AnimateEventTrigger(rag,event)
+hook.Add("BSF_RAGDOLLCONTROL(PostBodyAnimation)","BSF_RAGDOLLCONTROL_ANIMATION.AnimEventsRagThink",BSF_RAGDOLLCONTROL_ANIMATION.AnimEventsRagThink)
+
+function BSF_RAGDOLLCONTROL_ANIMATION:AnimateEventTrigger(rag,event)				--Writes animation event on ragdoll for 1 server tick; To read in "Think"-like hooks, Use inside (animation) functions
 	rag._AnimEvents = rag._AnimEvents or {}
 	rag._AnimEvents[event] = CurTime()
-	hook.Add("Think",rag,BSF_RAGDOLLCONTROL_ANIMATION.AnimEventsRagThink)
+	--hook.Add("Think",rag,BSF_RAGDOLLCONTROL_ANIMATION.AnimEventsRagThink)	--; Allah-Allah, CONFLICT REDO
 end
 
-function BSF_RAGDOLLCONTROL_ANIMATION:AnimateRag(rag,anim,rate,animset)	--Use this only with continious animations. For animations like weapon reloads use BSF_RAGDOLLCONTROL:ResetAnimation
+function BSF_RAGDOLLCONTROL_ANIMATION:AnimateRag(rag,anim,rate,animset)				--Animates ragdoll; Use this only with continious animations. For animations like weapon reloads use BSF_RAGDOLLCONTROL:ResetAnimation
 	rag._RagAnimStart = rag._RagAnimStart or {}
 	rag._RagAnimStart_LastCall = rag._RagAnimStart_LastCall or {}
 	
@@ -78,7 +90,9 @@ function BSF_RAGDOLLCONTROL_ANIMATION:GetAnimTime(rag,anim,rate,animset)
 	return BSF_RAGDOLLCONTROL_ANIMATION.AnimationSetsReportedTime[animset][anim]/rate
 end
 
-function BSF_RAGDOLLCONTROL_ANIMATION:AnimateRag_Reset(rag,mode)
+--\\Animations Resets
+
+function BSF_RAGDOLLCONTROL_ANIMATION:AnimateRag_Reset(rag,mode)					--Tells BSF_RAGDOLLCONTROL_ANIMATION:AnimateRag() to reset anim cycle; Usualy called in (animation) functions
 	hook.Run("BSF_RAGDOLLCONTROL_ANIMATION(Pre_AnimationReset)",rag,mode)
 	rag._RagAnimStart = rag._RagAnimStart or {}
 	rag._RagAnimStart_LastCall = rag._RagAnimStart_LastCall or {}
@@ -90,10 +104,7 @@ function BSF_RAGDOLLCONTROL_ANIMATION:AnimateRag_Reset(rag,mode)
 	hook.Run("BSF_RAGDOLLCONTROL_ANIMATION(AnimationReset)",rag,mode)
 end
 
-
-//Animations Resets
-
-function BSF_RAGDOLLCONTROL_ANIMATION:ResetAnimation(rag,anim,rate,animset,args)	--Plays animation until BSF_RAGDOLLCONTROL_ANIMATION:AnimateRag_Reset call (Call this once and animation will play until it stops)
+function BSF_RAGDOLLCONTROL_ANIMATION:ResetAnimation(rag,anim,rate,animset,args)	--Starts animation from cycle 0 and then plays it until in ends; Plays animation until BSF_RAGDOLLCONTROL_ANIMATION:AnimateRag_Reset call (Call this once and animation will play until it stops)
 	rag._BSF_RagAnimationsPlaying = rag._BSF_RagAnimationsPlaying or {}
 	rag._BSF_RagAnimationsPlaying[anim] = {
 		Rate = rate,
@@ -102,7 +113,9 @@ function BSF_RAGDOLLCONTROL_ANIMATION:ResetAnimation(rag,anim,rate,animset,args)
 	}
 end
 
-function BSF_RAGDOLLCONTROL_ANIMATION:IsAnimating(rag,anim)
+--//
+
+function BSF_RAGDOLLCONTROL_ANIMATION:IsAnimating(rag,anim)							--; Self explanatory
 	rag._BSF_RagAnimationsPlaying = rag._BSF_RagAnimationsPlaying or {}
 	return rag._BSF_RagAnimationsPlaying[anim]~=nil
 end
@@ -118,5 +131,4 @@ BSF_RAGDOLLCONTROL_ANIMATION.AnimationsThink = function(rag,eyeangs,footbase,add
 		BSF_RAGDOLLCONTROL_ANIMATION:AnimateRag(rag,anim,info.Rate,info.Animset)
 	end
 end
-
-hook.Add("BSF_RAGDOLLCONTROL(PostBodyAnimation)","BSF_RAGDOLLCONTROL_ANIMATION",BSF_RAGDOLLCONTROL_ANIMATION.AnimationsThink)
+hook.Add("BSF_RAGDOLLCONTROL(PostBodyAnimation)","BSF_RAGDOLLCONTROL_ANIMATION.AnimationsThink",BSF_RAGDOLLCONTROL_ANIMATION.AnimationsThink)

@@ -118,7 +118,7 @@ SWEP.WeaponConstraintStates = {
 		self:PositionWeaponEnt()
 		self:WeldWeaponEnt()
 	end,
-},
+}
 --//
 
 --\\Animations

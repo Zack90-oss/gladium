@@ -353,8 +353,10 @@ end
 //Movement think
 
 BSF_RAGDOLLCONTROL.RagdollThink = function(rag)
+	hook.Run("BSF(Pre_RagdollThink)",rag)
 	BSF_RAGDOLLCONTROL:TrySetupBones(rag)
 	BSF_RAGDOLLCONTROL:RagdollMovement(rag)
+	hook.Run("BSF(RagdollThink)",rag)
 end
 
 local function _unNormalizeAngle(ang)
